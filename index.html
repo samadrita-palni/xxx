@@ -1,0 +1,98 @@
+<html>
+
+<head>
+    <title>User Login</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="./styles/style.css">
+</head>
+
+<body>
+    <div class="body"></div>
+    <div class="grad"></div>
+    <div class="header">
+        <div>Create<span><br>Conversations</span></div>
+    </div>
+    <br>
+
+    <div class="login">
+
+        <input required id="message" type="text" placeholder="message"><span class="submiterror"
+            style="display:none;color:red;margin-left:10px;"> * Please enter a message</span>
+        <br>
+        <input required id="senderId" type="text" placeholder="senderId"><span class="submiterror"
+            style="display:none;color:red;margin-left:10px;"> * Please enter sender Id</span>
+        <br>
+        <input required id="senderName" type="text" placeholder="senderName"><span class="submiterror"
+            style="display:none;color:red;margin-left:10px;"> * Please enter sender Name</span>
+        <br>
+        <input required id="receiverId" type="text" placeholder="receiverId"><span class="submiterror"
+            style="display:none;color:red;margin-left:10px;"> * Please enter receiver Id</span>
+        <br>
+        <input required id="receiverName" type="text" placeholder="receiverName"><span class="submiterror"
+            style="display:none;color:red;margin-left:10px;"> * Please enter receiver Name</span>
+        <br>
+        <input id="submit" type="button" value="Submit">
+
+    </div>
+</body>
+
+</html>
+
+<script>
+    $(document).ready(function () {
+
+        var serverUrl = "http://localhost:3000";
+
+
+        $(document).on('click', '#submit', function () {
+            try {
+                $('.submiterror').hide();
+                var error = 0;
+                $('.login input').each(function () {
+                    if (!(this.value.trim())) {
+                        $(this).next('.submiterror').show();
+                        error++;
+                        return false;
+                    }
+                });
+            } catch (e) {
+                console.log("exception handled with error " + e);
+            }
+
+            if (error === 0) {
+                try {
+                    $.ajax({
+                        url: serverUrl + '/api/saveDetails',
+                        type: "POST",
+                        data: { "message": $("#message").val(), "senderUserDetails": { "name": $("#senderName").val(), "id": $("#senderId").val() }, "receiverUserDetails": { "name": $("#receiverName").val(), "id": $("#receiverId").val() } },
+                        async: true,
+                        success: function (data) {
+                            clearValues();
+                            try {
+                                if (data) {
+                                    alert(data.message);
+                                }
+                            } catch (e) {
+                                console.log("exception handeled with " + e);
+                            }
+                        },
+                        error: function (error) {
+                            clearValues();
+                            console.log(error);
+                            alert("error while api call is ", error);
+                        }
+                    });
+                } catch (e) {
+                    console.log("exception handled with error " + e);
+                }
+            }
+        });
+        function clearValues() {
+            $('.login input').each(function () {
+                if ($(this).attr('id') !== "submit") {
+                    $(this).val('');
+                }
+            });
+        }
+    });
+</script>
